@@ -1,4 +1,3 @@
-.PHONY:all
 all:server client
 
 server:server.c com.c
