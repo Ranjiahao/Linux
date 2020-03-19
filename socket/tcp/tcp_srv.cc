@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     CHECK_RET(lst_sock.Bind(ip, port));
     CHECK_RET(lst_sock.Listen());
     std::string buf;
-    while(1) {
+    while (1) {
         TcpSocket newsock;
         if (!lst_sock.Accept(&newsock, &ip, &port)) {
             continue;
@@ -32,6 +32,8 @@ int main(int argc, char* argv[]) {
         std::cin >> buf;
         newsock.Send(buf);
         buf.clear();
+        CHECK_RET(newsock.Close());
     }
+    CHECK_RET(lst_sock.Close());
     return 0;
 }

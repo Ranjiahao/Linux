@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     CHECK_RET(sock.Socket());
     CHECK_RET(sock.Connect(ip, port));
     std::string buf;
-    while(1) {
+    while (1) {
         std::cout << "client say: ";
         std::cin >> buf;
         CHECK_RET(sock.Send(buf));
@@ -26,5 +26,6 @@ int main(int argc, char* argv[]) {
         std::cout << "server say: "<< buf << std::endl;
         buf.clear();
     }
+    CHECK_RET(sock.Close());
     return 0;
 }

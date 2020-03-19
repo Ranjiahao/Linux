@@ -9,6 +9,7 @@
     }
 
 void sigcb(int signo) {
+    (void)signo;
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
@@ -25,7 +26,7 @@ int main(int argc, char* argv[]) {
     CHECK_RET(lst_sock.Bind(ip, port));
     CHECK_RET(lst_sock.Listen());
     TcpSocket newsock;
-    while(1) {
+    while (1) {
         if (!lst_sock.Accept(&newsock, &ip, &port)) {
             continue;
         }
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
             // 1. 任务分摊--每个进程只负责一个任务，主进程负责获取新连接
             // 2. 稳定性高--子进程处理请求出问题不会影响到主进程服务器
             std::string buf;
-            while(1) {
+            while (1) {
                 if (!newsock.Recv(&buf)) {
                     newsock.Close();
                     exit(-1);
@@ -53,11 +54,12 @@ int main(int argc, char* argv[]) {
                 }
                 buf.clear();
             }
-            newsock.Close();
+            CHECK_RET(newsock.Close());
             exit(0);
         } else {
-            newsock.Close(); // 父进程关闭自己的不用的socket不影响子进程
+            CHECK_RET(newsock.Close()); // 父进程关闭自己的不用的socket不影响子进程
         }
     }
+    CHECK_RET(lst_sock.Close());
     return 0;
 }

@@ -18,10 +18,6 @@ public:
     TcpSocket()
         : _sockfd(-1) {}
 
-    ~TcpSocket() {
-        Close();
-    }
-
     bool Socket() {
         _sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (_sockfd < 0) {
@@ -115,6 +111,10 @@ public:
             _sockfd = -1;
         }
         return true;
+    }
+
+    int GetFd() const {
+        return _sockfd;
     }
 private:
     int _sockfd;

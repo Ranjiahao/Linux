@@ -15,8 +15,9 @@ struct Information {
 void* thr_start(void* arg) {
     Information* info = (Information*)arg;
     std::string buf;
-    while(1) {
+    while (1) {
         if (!info->sock.Recv(&buf)) {
+            info->sock.Close();
             delete info;
             return NULL;
         }
@@ -25,6 +26,7 @@ void* thr_start(void* arg) {
         std::cout << "server say: ";
         std::cin >> buf;
         if (!info->sock.Send(buf)) {
+            info->sock.Close();
             delete info;
             return NULL;
         }
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
     CHECK_RET(lst_sock.Socket());
     CHECK_RET(lst_sock.Bind(ip, port));
     CHECK_RET(lst_sock.Listen());
-    while(1) {
+    while (1) {
         // 再堆上申请空间防止析构
         Information* info = new Information();
         if (!lst_sock.Accept(&info->sock, &info->ip, &info->port)) {
@@ -58,5 +60,6 @@ int main(int argc, char* argv[]) {
         pthread_create(&tid, NULL, thr_start, (void*)info);
         pthread_detach(tid);
     }
+    CHECK_RET(lst_sock.Close());
     return 0;
 }
