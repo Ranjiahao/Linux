@@ -1,12 +1,12 @@
 // 封装一个TcpSocket类，向外提供更容易使用的tcp接口来实现tcp通信流程
 
-#include <iostream>
-#include <string>
-#include <cstdio>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+#include <iostream>
+#include <string>
 
 #define MAX_LISTEN 5
 
@@ -15,8 +15,8 @@ typedef struct sockaddr_in sockaddr_in;
 
 class TcpSocket {
 public:
-    TcpSocket()
-        : _sockfd(-1) {}
+    TcpSocket(int i = -1)
+        : _sockfd(i) {}
 
     bool Socket() {
         _sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -101,6 +101,23 @@ public:
         *buf = std::string(tmp, ret);
         return true;
     }
+    
+    int GetFd() const {
+        return _sockfd;
+    }
+
+    bool SetNonBlock() {
+        int flag = fcntl(_sockfd, F_GETFL, 0);
+        if (flag < 0) {
+            perror("fcntl");
+            return false;
+        }
+        if (fcntl(_sockfd, F_SETFL, O_NONBLOCK | flag) < 0) {
+            perror("fcntl");
+            return false;
+        }
+        return true;
+    }
 
     bool Close() {
         if (_sockfd >= 0) {
@@ -113,9 +130,6 @@ public:
         return true;
     }
 
-    int GetFd() const {
-        return _sockfd;
-    }
 private:
     int _sockfd;
 };

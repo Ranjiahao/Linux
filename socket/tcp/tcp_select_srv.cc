@@ -66,7 +66,7 @@ private:
     std::unordered_map<int, TcpSocket> _fdmap;
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cout << "Usage: ./tcp_srv ip port" << std::endl;
         return -1;
