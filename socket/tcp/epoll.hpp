@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sys/epoll.h>
 #include <vector>
 #include "tcp_socket.hpp"

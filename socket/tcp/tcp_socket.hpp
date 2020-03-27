@@ -126,6 +126,7 @@ public:
     }
     
     bool RecvNoBlock(std::string* buf) const {
+        // 暂不考虑粘包问题
         char tmp[4096] = { 0 };
         while (1) {
             int ret = recv(_sockfd, tmp, 4095, 0);

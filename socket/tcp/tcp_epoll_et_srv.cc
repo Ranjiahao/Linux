@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
     CHECK_RET(lst_sock.Socket());
     CHECK_RET(lst_sock.Bind(ip, port));
     CHECK_RET(lst_sock.Listen());
+    // 暂不考虑监听套接字ET的情况
     Epoll e;
     CHECK_RET(e.Init());
     CHECK_RET(e.Add(lst_sock));
