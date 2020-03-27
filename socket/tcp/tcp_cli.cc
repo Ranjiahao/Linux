@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     std::string buf;
     while (1) {
         std::cout << "client say: ";
-        std::cin >> buf;
+        getline(std::cin, buf);
         CHECK_RET(sock.Send(buf));
         buf.clear();
         CHECK_RET(sock.Recv(&buf));

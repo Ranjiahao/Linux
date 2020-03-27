@@ -87,6 +87,29 @@ public:
         return true;
     }
 
+    bool SendNoBlock(const std::string& buf) const {
+        int cur = 0; // 当前写到的位置
+        int left = buf.size();
+        while (1) {
+            int write_size = send(_sockfd, &buf[0] + cur, left, 0);
+            if (write_size < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    // TCP发送缓冲区满了
+                    continue;
+                }
+                perror("send");
+                return false;
+            }
+            cur += write_size;
+            left -= write_size;
+            if (left <= 0) {
+                // 写完数据
+                break;
+            }
+        }
+        return true;
+    }
+
     bool Recv(std::string* buf) const {
         char tmp[4096] = { 0 };
         int ret = recv(_sockfd, tmp, 4095, 0);
@@ -102,11 +125,28 @@ public:
         return true;
     }
     
-    int GetFd() const {
-        return _sockfd;
+    bool RecvNoBlock(std::string* buf) const {
+        char tmp[4096] = { 0 };
+        while (1) {
+            int ret = recv(_sockfd, tmp, 4095, 0);
+            if (ret < 0) {
+                if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                    // TCP接收缓冲区为空
+                    return true;
+                }
+                perror("recv");
+                return false;
+            } else if (ret == 0) {
+                // 连接已经断开
+                std::cerr << "peer shutdown" << std::endl;
+                return false;
+            }
+            tmp[ret] = '\0';
+            *buf += tmp;
+        }
     }
 
-    bool SetNonBlock() {
+    bool SetNonBlock() const {
         int flag = fcntl(_sockfd, F_GETFL, 0);
         if (flag < 0) {
             perror("fcntl");
@@ -119,6 +159,10 @@ public:
         return true;
     }
 
+    int GetFd() const {
+        return _sockfd;
+    }
+
     bool Close() {
         if (_sockfd >= 0) {
             if (close(_sockfd) < 0) {
@@ -129,7 +173,6 @@ public:
         }
         return true;
     }
-
 private:
     int _sockfd;
 };
